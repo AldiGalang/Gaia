@@ -5,7 +5,6 @@ show_menu() {
     echo "1. Install Node"
     echo "2. Node Information"
     echo "3. Exit"
-    echo "============================"
 }
 
 install_multiple_nodes() {
