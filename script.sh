@@ -1,9 +1,9 @@
 #!/bin/bash
 
 show_menu() {
-    echo "===== Zstake Storage Node Installation Menu ====="
-    echo "1. Install 0g-storage-node"
-    echo "7. Exit"
+    echo "Installation Script By RisolMayoETH"
+    echo "1. Install Node"
+    echo "2. Exit"
     echo "============================"
 }
 
@@ -51,8 +51,8 @@ while true; do
     show_menu
     read -p "Select an option (1-7): " choice
     case $choice in
-        1) install_node ;;
-        7) echo "Exiting..."; exit 0 ;;
+        1) install_multiple_nodes ;;
+        2) echo "Exiting..."; exit 0 ;;
         *) echo "Invalid option. Please try again." ;;
     esac
     echo ""
