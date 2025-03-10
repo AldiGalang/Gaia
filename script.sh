@@ -38,7 +38,7 @@ install_multiple_nodes() {
   # Running all node
   for ((i=1; i<=node_count; i++)); do
     node_name=$(printf "gaia-%02d" $i)
-    gaianet start --base "$HOME/$node_name" &
+    gaianet start --base "$HOME/$node_name"
   done
   
   echo "✅ All nodes have been installed successfully!"
