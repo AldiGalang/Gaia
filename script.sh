@@ -21,7 +21,13 @@ install_multiple_nodes() {
 
   for ((i=1; i<=node_count; i++)); do
     node_name=$(printf "gaia-%02d" $i)
-    port=$((8000 + i - 1))             
+    port=$((8000 + i - 1))  
+    
+    # **Cek apakah node sudah ada**
+    if [[ -d "$node_path" ]]; then
+      echo "⚠️ Node $node_name already exists, skipping..."
+      continue
+    fi
 
     mkdir -p "$HOME/$node_name"
     curl -sSfL 'https://github.com/GaiaNet-AI/gaianet-node/releases/latest/download/install.sh' | bash -s -- --base "$HOME/$node_name"
