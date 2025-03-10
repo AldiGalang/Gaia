@@ -39,6 +39,9 @@ install_multiple_nodes() {
     gaianet init --base "$node_path"
   done
 
+ # Kill proses yang berjalan di semua port jika ada
+  sudo lsof -t -i:8000-$(($port)) | xargs kill -9 2>/dev/null
+
   # Running all nodes
   for node_path in "$HOME"/gaia-*; do
     if [[ -d "$node_path" ]]; then
