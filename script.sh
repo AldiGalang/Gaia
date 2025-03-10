@@ -41,8 +41,6 @@ install_multiple_nodes() {
     gaianet start --base "$HOME/$node_name" &
   done
   
-  echo "All nodes have been installed successfully!"
-  sleep 2
 }
   show_info() {
     echo "Displating Node Info..."
