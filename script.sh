@@ -39,20 +39,28 @@ install_multiple_nodes() {
     node_name=$(printf "gaia-%02d" $i)
     gaianet start --base "$HOME/$node_name" &
   done
-
-  # Menampilkan informasi setiap node
-  for ((i=1; i<=node_count; i++)); do
-    node_name=$(printf "gaia-%02d" $i)
-    gaianet info --base "$HOME/$node_name"
-  done
 }
-
+  show_info() {
+    echo "Displating Node Info..."
+    # Direktori tempat node Gaianet disimpan
+    base_dir="$HOME"
+    
+      # Loop melalui setiap folder dengan nama yang sesuai pola gaia-*
+    for node_path in "$base_dir"/gaia-*; do
+        # Pastikan hanya folder yang diproses
+        if [[ -d "$node_path" ]]; then
+            echo "Menampilkan informasi untuk node: $node_path"
+            gaianet info --base "$node_path"
+        fi
+    done
+}
 while true; do
     show_menu
     read -p "Select an option (1-7): " choice
     case $choice in
         1) install_multiple_nodes ;;
-        2) echo "Exiting..."; exit 0 ;;
+        2) show_info ;;
+        3) echo "Exiting..."; exit 0 ;;
         *) echo "Invalid option. Please try again." ;;
     esac
     echo ""
