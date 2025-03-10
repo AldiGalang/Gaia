@@ -10,6 +10,7 @@ NC='\033[0m' # No Color
 show_menu() {
     echo -e "${CYAN}==============================================${NC}"
     echo -e "  🚀 ${YELLOW}G A I A N E T   N O D E   M A N A G E M E N T${NC} 🚀"
+    echo -e ""
     echo -e "                    ${BOLD}${YELLOW}by RisolMayoETH${NC}"
     echo -e "${CYAN}==============================================${NC}"
     echo -e "  ${GREEN}1.${NC} 📥 Install Node"
