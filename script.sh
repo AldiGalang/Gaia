@@ -60,7 +60,7 @@ install_multiple_nodes() {
 }
 while true; do
     show_menu
-    read -p "Select an option (1-7): " choice
+    read -p "Select an option (1-3): " choice
     case $choice in
         1) install_multiple_nodes ;;
         2) show_info ;;
