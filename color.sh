@@ -60,21 +60,21 @@ start_specific_node() {
         echo -e "${RED}❌ Invalid input! Please enter a valid number.${NC}"
         return 1
     fi
-
-    node_name=$(printf "gaia-%02d" $node_number)
-    node_path="$HOME/$node_name"
-
-    if [[ ! -d "$node_path" ]]; then
-        echo -e "${RED}❌ Node $node_name does not exist!${NC}"
-        return 1
-    fi
-
+    
     port=$((8000 + node_number - 1))
     pid=$(sudo lsof -t -i:$port 2>/dev/null)
 
     if [[ -n "$pid" ]]; then
         echo -e "🛑 ${YELLOW}Stopping existing process on port $port (PID: $pid)...${NC}"
         sudo kill -9 "$pid"
+    fi
+    
+    node_name=$(printf "gaia-%02d" $node_number)
+    node_path="$HOME/$node_name"
+
+    if [[ ! -d "$node_path" ]]; then
+        echo -e "${RED}❌ Node $node_name does not exist!${NC}"
+        return 1
     fi
 
     echo -e "🟢 ${GREEN}Starting node: $node_name...${NC}"
