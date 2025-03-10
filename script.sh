@@ -44,3 +44,14 @@ install_multiple_nodes() {
     gaianet info --base "$HOME/$node_name"
   done
 }
+
+while true; do
+    show_menu
+    read -p "Select an option (1-7): " choice
+    case $choice in
+        1) install_node ;;
+        7) echo "Exiting..."; exit 0 ;;
+        *) echo "Invalid option. Please try again." ;;
+    esac
+    echo ""
+done
