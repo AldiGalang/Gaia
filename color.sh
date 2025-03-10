@@ -12,6 +12,7 @@ show_menu() {
     echo -e "  🚀 ${YELLOW}G A I A N E T   N O D E   M A N A G E M E N T${NC} 🚀"
     echo -e ""
     echo -e "                    ${BOLD}${YELLOW}by RisolMayoETH${NC}"
+    echo -e "    ${BOLD}${YELLOW}Domains : optimize.gaia.domains${NC}"
     echo -e "${CYAN}==============================================${NC}"
     echo -e "  ${GREEN}1.${NC} 📥 Install Node"
     echo -e "  ${GREEN}2.${NC} 🚀 Start a Specific Node"
@@ -30,6 +31,7 @@ install_multiple_nodes() {
 
     sudo apt update && sudo apt upgrade -y
     sudo apt-get update && sudo apt-get upgrade -y
+    sudo apt install -y curl wget unzip git nano jq lsof
 
     for ((i=1; i<=node_count; i++)); do
         node_name=$(printf "gaia-%02d" $i)
