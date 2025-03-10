@@ -8,7 +8,6 @@ YELLOW='\033[1;33m'
 NC='\033[0m' # No Color
 
 show_menu() {
-    clear
     echo -e "${CYAN}==============================================${NC}"
     echo -e "  🚀 ${YELLOW}GaiaNet Node Management Script${NC} 🚀"
     echo -e "${CYAN}==============================================${NC}"
