@@ -1,3 +1,10 @@
+show_menu() {
+    echo "===== Zstake Storage Node Installation Menu ====="
+    echo "1. Install 0g-storage-node"
+    echo "7. Exit"
+    echo "============================"
+}
+
 install_multiple_nodes() {
   read -p "Masukkan jumlah node Gaia yang ingin diinstal: " node_count
 
