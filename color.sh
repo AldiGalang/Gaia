@@ -10,11 +10,11 @@ NC='\033[0m' # No Color
 show_menu() {
     echo -e "${CYAN}==============================================${NC}"
     echo -e "  🚀 ${YELLOW}G A I A N E T   N O D E   M A N A G E M E N T${NC} 🚀"
-    echo -e "            ${BOLD}${YELLOW}by RisolMayoETH${NC}"
+    echo -e "                    ${BOLD}${YELLOW}by RisolMayoETH${NC}"
     echo -e "${CYAN}==============================================${NC}"
     echo -e "  ${GREEN}1.${NC} 📥 Install Node"
     echo -e "  ${GREEN}2.${NC} 🚀 Start a Specific Node"
-    echo -e "  ${GREEN}3.${NC} ℹ️  Show Node ${NC}"  # Reset warna sebelum teks
+    echo -e "  ${GREEN}3.${NC} ℹ️  Show Node Data"  # Reset warna sebelum teks
     echo -e "  ${GREEN}4.${NC} ❌ Exit"
     echo -e "${CYAN}==============================================${NC}"
 }
