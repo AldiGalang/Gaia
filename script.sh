@@ -3,7 +3,8 @@
 show_menu() {
     echo "Installation Script By RisolMayoETH"
     echo "1. Install Node"
-    echo "2. Exit"
+    echo "2. Node Info"
+    echo "3. Exit"
     echo "============================"
 }
 
