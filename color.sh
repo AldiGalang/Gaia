@@ -61,12 +61,18 @@ start_specific_node() {
     fi
     
     port=$((8000 + node_number - 1))
-    pid=$(sudo lsof -t -i:$port 2>/dev/null)
-
-    if [[ -n "$pid" ]]; then
-        echo -e "🛑 ${YELLOW}Stopping existing process on port $port (PID: $pid)...${NC}"
-        sudo kill -9 "$pid"
+    echo -e "🛑 Stopping existing process on port $port..."
+    pids=$(sudo lsof -t -i:$port 2>/dev/null)
+    
+    if [[ -n "$pids" ]]; then
+        echo -e "🔴 Killing process on port $port (PID: $pids)"
+        for pid in $pids; do
+            sudo kill -9 "$pid"
+        done
+    else
+        echo -e "✅ No existing process found on port $port."
     fi
+
     
     node_name=$(printf "gaia-%02d" $node_number)
     node_path="$HOME/$node_name"
