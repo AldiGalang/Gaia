@@ -3,17 +3,17 @@
 show_menu() {
     echo "Installation Script By RisolMayoETH"
     echo "1. Install Node"
-    echo "2. Node Info"
+    echo "2. Node Information"
     echo "3. Exit"
     echo "============================"
 }
 
 install_multiple_nodes() {
-  read -p "Masukkan jumlah node Gaia yang ingin diinstal: " node_count
+  read -p "How much you want install node?: " node_count
 
   # Validasi input (hanya angka positif)
   if ! [[ "$node_count" =~ ^[1-9][0-9]*$ ]]; then
-    echo "Input harus berupa angka positif!" 
+    echo "Input should positif example 1" 
     return 1
   fi
 
@@ -21,8 +21,8 @@ install_multiple_nodes() {
   sudo apt-get update && sudo apt-get upgrade -y
 
   for ((i=1; i<=node_count; i++)); do
-    node_name=$(printf "gaia-%02d" $i)  # Format nama: gaia-01, gaia-02, ...
-    port=$((8000 + i - 1))              # Port mulai dari 8000, 8001, 8002, ...
+    node_name=$(printf "gaia-%02d" $i)
+    port=$((8000 + i - 1))             
 
     mkdir -p "$HOME/$node_name"
     curl -sSfL 'https://github.com/GaiaNet-AI/gaianet-node/releases/latest/download/install.sh' | bash -s -- --base "$HOME/$node_name"
@@ -35,7 +35,7 @@ install_multiple_nodes() {
   # Kill proses yang berjalan di semua port jika ada
   sudo lsof -t -i:8000-$(($port)) | xargs kill -9 2>/dev/null
 
-  # Menjalankan semua node
+  # Running all node
   for ((i=1; i<=node_count; i++)); do
     node_name=$(printf "gaia-%02d" $i)
     gaianet start --base "$HOME/$node_name" &
@@ -43,10 +43,10 @@ install_multiple_nodes() {
 }
   show_info() {
     echo "Displating Node Info..."
-    # Direktori tempat node Gaianet disimpan
+    # Save Directory Gaia Node Information
     base_dir="$HOME"
     
-      # Loop melalui setiap folder dengan nama yang sesuai pola gaia-*
+      # Loop*
     for node_path in "$base_dir"/gaia-*; do
         # Pastikan hanya folder yang diproses
         if [[ -d "$node_path" ]]; then
