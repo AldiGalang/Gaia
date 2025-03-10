@@ -1,3 +1,5 @@
+#!/bin/bash
+
 show_menu() {
     echo "===== Zstake Storage Node Installation Menu ====="
     echo "1. Install 0g-storage-node"
