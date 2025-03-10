@@ -107,7 +107,7 @@ while true; do
         1) install_multiple_nodes ;;
         2) start_specific_node ;;
         3) show_info ;;
-        4) echo -e "🚪 ${RED}Exiting...${NC}"; exit 0 ;;
+        4) echo -e "🚪 ${RED}Exiting...${NC}"; break ;;  # Menggunakan break, bukan exit
         *) echo -e "❌ ${RED}Invalid option. Please try again.${NC}" ;;
     esac
     echo ""
