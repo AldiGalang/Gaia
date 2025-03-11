@@ -107,9 +107,13 @@ EOF
 }
 
 start_node() {
+    sudo systemctl stop zgs
     echo -e "\033[32m[+] Starting Storage Node...\033[0m"
-    sudo systemctl enable --now zgs
-    echo -e "\033[32m[+] Node is running! Use 'sudo journalctl -u zgs -f' to check logs.\033[0m"
+    sudo systemctl daemon-reload && \
+    sudo systemctl enable zgs && \
+    sudo systemctl restart zgs && \
+    sudo systemctl status zgs
+    echo -e "\033[32m[+] Node is running!.\033[0m"
     show_menu
     main_menu
 }
