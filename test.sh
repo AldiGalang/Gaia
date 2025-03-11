@@ -92,18 +92,14 @@ EOF
 
     # Reload systemd tanpa langsung menjalankan service
     sudo systemctl daemon-reload
-
+    cd ..
     echo -e "\033[32m[+] Node installation complete! Use option 2 to start the node.\033[0m"
-
-    show_menu
 }
 
 start_node() {
     echo -e "\033[32m[+] Starting Storage Node...\033[0m"
     sudo systemctl enable --now zgs
     echo -e "\033[32m[+] Node is running! Use 'sudo journalctl -u zgs -f' to check logs.\033[0m"
-
-    show_menu
 }
 
 show_menu
