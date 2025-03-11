@@ -94,34 +94,23 @@ EOF
     sudo systemctl daemon-reload
 
     echo -e "\033[32m[+] Node installation complete! Use option 2 to start the node.\033[0m"
-
-    # Kembali ke home directory agar tidak tetap di dalam 0g-storage-node
-    cd $HOME
-
-    # Tampilkan menu lagi
-    show_menu
-    main_menu
 }
 
 start_node() {
     echo -e "\033[32m[+] Starting Storage Node...\033[0m"
     sudo systemctl enable --now zgs
     echo -e "\033[32m[+] Node is running! Use 'sudo journalctl -u zgs -f' to check logs.\033[0m"
-
-    # Tampilkan menu lagi setelah menjalankan node
-    show_menu
-    main_menu
 }
 
-main_menu() {
-    read -p "Enter your choice: " choice
-    case $choice in
-        1) install_node ;;
-        2) start_node ;;
-        3) echo "Change RPC - Not implemented yet." ;;
-        4) sudo journalctl -u zgs -f ;;
-        5) echo "Check Peers - Not implemented yet." ;;
-        6) exit 0 ;;
-        *) echo "Invalid choice!" ;;
-    esac
-}
+show_menu
+
+read -p "Enter your choice: " choice
+case $choice in
+    1) install_node ;;
+    2) start_node ;;
+    3) echo "Change RPC - Not implemented yet." ;;
+    4) sudo journalctl -u zgs -f ;;
+    5) echo "Check Peers - Not implemented yet." ;;
+    6) exit 0 ;;
+    *) echo "Invalid choice!" ;;
+esac
