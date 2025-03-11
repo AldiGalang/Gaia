@@ -58,7 +58,7 @@ install_multiple_nodes() {
 }
 
 start_specific_node() {
-    read -p "Enter node one by one (example 1 after then 2 and so on): " node_number
+    read -p "Enter node one by one (example 1 after then 2 and so on): "node_number
 
     if ! [[ "$node_number" =~ ^[1-9][0-9]*$ ]]; then
         echo -e "${RED}❌ Invalid input! Please enter a valid number.${NC}"
