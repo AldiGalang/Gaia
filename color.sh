@@ -14,7 +14,7 @@ show_menu() {
     echo -e "                    ${BOLD}${YELLOW}by RisolMayoETH${NC}"
     echo -e ""
     echo -e ""
-    echo -e "    ${BOLD}${YELLOW}Domains : optimize.gaia.domains${NC}"
+    echo -e "                ${BOLD}${YELLOW}optimize.gaia.domains${NC}"
     echo -e "${CYAN}==============================================${NC}"
     echo -e "  ${GREEN}1.${NC} 📥 Install Node"
     echo -e "  ${GREEN}2.${NC} 🚀 Start a Specific Node"
