@@ -35,7 +35,6 @@ install_node() {
 
     if ! command -v go &> /dev/null; then
         echo -e "\033[32m[+] Installing Go...\033[0m"
-        cd $HOME
         ver="1.22.0"
         wget -q "https://golang.org/dl/go$ver.linux-amd64.tar.gz" || { echo -e "\033[31m[-] Failed to download Go!\033[0m"; exit 1; }
         sudo rm -rf /usr/local/go
@@ -58,10 +57,10 @@ install_node() {
     fi
 
     echo -e "\033[32m[+] Cloning 0G Storage Node repository...\033[0m"
-    cd $HOME
-    rm -rf 0g-storage-node
-    git clone https://github.com/0glabs/0g-storage-node.git || { echo -e "\033[31m[-] Failed to clone repository!\033[0m"; exit 1; }
-    cd 0g-storage-node
+    rm -rf "$HOME/0g-storage-node"
+    git clone https://github.com/0glabs/0g-storage-node.git "$HOME/0g-storage-node" || { echo -e "\033[31m[-] Failed to clone repository!\033[0m"; exit 1; }
+    
+    cd "$HOME/0g-storage-node"
     git checkout v0.8.4 || { echo -e "\033[31m[-] Failed to checkout branch!\033[0m"; exit 1; }
     git submodule update --init || { echo -e "\033[31m[-] Failed to update submodules!\033[0m"; exit 1; }
 
@@ -69,7 +68,8 @@ install_node() {
     cargo build --release || { echo -e "\033[31m[-] Build failed!\033[0m"; exit 1; }
 
     echo -e "\033[32m[+] Downloading Configuration File...\033[0m"
-    wget -q -O $HOME/0g-storage-node/run/config-testnet-turbo.toml https://josephtran.co/config-testnet-turbo.toml || { echo -e "\033[31m[-] Failed to download configuration file!\033[0m"; exit 1; }
+    mkdir -p "$HOME/0g-storage-node/run"
+    wget -q -O "$HOME/0g-storage-node/run/config-testnet-turbo.toml" https://josephtran.co/config-testnet-turbo.toml || { echo -e "\033[31m[-] Failed to download configuration file!\033[0m"; exit 1; }
 
     echo -e "\033[34mEnter your private key (it will be displayed): \033[0m"
     read PRIVATE_KEY
@@ -80,28 +80,34 @@ install_node() {
         exit 1
     fi
 
-    sed -i 's|^\s*#\?\s*miner_key\s*=.*|miner_key = "'"$PRIVATE_KEY"'"|' $HOME/0g-storage-node/run/config-testnet-turbo.toml
+    sed -i 's|^\s*#\?\s*miner_key\s*=.*|miner_key = "'"$PRIVATE_KEY"'"|' "$HOME/0g-storage-node/run/config-testnet-turbo.toml"
     echo -e "\033[32m[+] Private key has been successfully added to the config file.\033[0m"
 
+    echo -e "\033[32m[+] Creating systemd service...\033[0m"
     sudo tee /etc/systemd/system/zgs.service > /dev/null <<EOF
-        [Unit]
-        Description=ZGS Node
-        After=network.target
-        
-        [Service]
-        User=$USER
-        WorkingDirectory=$HOME/0g-storage-node/run
-        ExecStart=$HOME/0g-storage-node/target/release/zgs_node --config $HOME/0g-storage-node/run/config-testnet-turbo.toml
-        Restart=on-failure
-        RestartSec=10
-        LimitNOFILE=65535
-        
-        [Install]
-        WantedBy=multi-user.target
-        EOF
+[Unit]
+Description=ZGS Node
+After=network.target
 
-    echo -e "\033[32m[+] Installation Complete! You can now start your node.\033[0m"
+[Service]
+User=$USER
+WorkingDirectory=$HOME/0g-storage-node/run
+ExecStart=$HOME/0g-storage-node/target/release/zgs --config $HOME/0g-storage-node/run/config-testnet-turbo.toml
+Restart=on-failure
+RestartSec=10
+LimitNOFILE=65535
+
+[Install]
+WantedBy=multi-user.target
+EOF
+
+    sudo systemctl daemon-reload
+    sudo systemctl enable zgs
+
+    echo -e "\033[32m[+] Installation Complete! You can now start your node using:\033[0m"
+    echo -e "\033[36m sudo systemctl start zgs \033[0m"
 }
+
 
 start_node() {
     sudo systemctl stop zgs
