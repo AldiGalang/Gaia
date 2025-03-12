@@ -20,20 +20,6 @@ check_port() {
     fi
 }
 
-# Function to check if GaiaNet is installed correctly
-check_gaianet() {
-    if ! command -v ~/gaianet/bin/gaianet &> /dev/null; then
-        echo "❌ GaiaNet is not found! Please install it first."
-        exit 1
-    fi
-    gaianet_info=$( ~/gaianet/bin/gaianet info 2>/dev/null )
-    if [[ -z "$gaianet_info" ]]; then
-        echo "❌ GaiaNet is installed but not properly configured. Please reinstall."
-        exit 1
-    fi
-    echo "✅ GaiaNet detected."
-}
-
 # Main function to run the chatbot
 run_chatbot() {
     echo "🚀 Starting GaiaNet chatbot..."
