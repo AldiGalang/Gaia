@@ -16,7 +16,7 @@ show_menu() {
     echo -e "                ${BOLD}${YELLOW}optimize.gaia.domains${NC}"
     echo -e "${CYAN}==============================================${NC}"
     echo -e "  ${GREEN}1.${NC} 📥 Install Node"
-    echo -e "  ${GREEN}2.${NC} 🚀 Start a Specific Node"
+    echo -e "  ${GREEN}2.${NC} 🚀 Start All Node"
     echo -e "  ${GREEN}3.${NC} ℹ️  Show Node Data"  # Reset warna sebelum teks
     echo -e "  ${GREEN}4.${NC} ❌ Exit"
     echo -e "${CYAN}==============================================${NC}"
@@ -57,39 +57,32 @@ install_multiple_nodes() {
     sleep 2
 }
 
-start_specific_node() {
-    read -p "Enter node one by one (example 1 after then 2 and so on): "node_number
-
-    if ! [[ "$node_number" =~ ^[1-9][0-9]*$ ]]; then
-        echo -e "${RED}❌ Invalid input! Please enter a valid number.${NC}"
-        return 1
-    fi
+start_all_nodes() {
+    echo -e "🛑 Stopping all existing GaiaNet processes..."
     
-    port=$((8000 + node_number - 1))
-    echo -e "🛑 Stopping existing process on port $port..."
-    pids=$(sudo lsof -t -i:$port 2>/dev/null)
+    pids=$(pgrep -f "gaianet")
     
     if [[ -n "$pids" ]]; then
-        echo -e "🔴 Killing process on port $port (PID: $pids)"
-        for pid in $pids; do
-            sudo kill -9 "$pid"
-        done
+        echo -e "🔴 Killing existing GaiaNet processes (PIDs: $pids)"
+        sudo kill -9 $pids
     else
-        echo -e "✅ No existing process found on port $port."
+        echo -e "✅ No existing GaiaNet processes found."
     fi
 
+    echo -e "🚀 ${GREEN}Starting all nodes...${NC}"
     
-    node_name=$(printf "gaia-%02d" $node_number)
-    node_path="$HOME/$node_name"
+    base_dir="$HOME"
 
-    if [[ ! -d "$node_path" ]]; then
-        echo -e "${RED}❌ Node $node_name does not exist!${NC}"
-        return 1
-    fi
-
-    echo -e "🟢 ${GREEN}Starting node: $node_name...${NC}"
-    gaianet start --base "$node_path"
+    for node_path in "$base_dir"/gaia-*; do
+        if [[ -d "$node_path" ]]; then
+            echo -e "🟢 ${GREEN}Starting node: $(basename $node_path)...${NC}"
+            gaianet start --base "$node_path" &
+        fi
+    done
+    
+    echo -e "✅ ${GREEN}All nodes started successfully!${NC}"
 }
+
 
 show_info() {
     echo -e "📡 ${CYAN}Displaying Node Info...${NC}"
@@ -108,7 +101,7 @@ while true; do
     read -p "Select an option (1-4): " choice
     case $choice in
         1) install_multiple_nodes ;;
-        2) start_specific_node ;;
+        2) start_all_nodes ;;
         3) show_info ;;
         4) echo -e "🚪 ${RED}Exiting...${NC}"; break ;;  # Menggunakan break, bukan exit
         *) echo -e "❌ ${RED}Invalid option. Please try again.${NC}" ;;
