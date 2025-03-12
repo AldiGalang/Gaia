@@ -28,20 +28,20 @@ show_menu() {
 
 install_node() {
     echo -e "\033[32m[+] Updating System...\033[0m"
-    sudo apt-get update && sudo apt-get upgrade -y
+    sudo apt-get update && sudo apt-get upgrade -y || { echo -e "\033[31m[-] Update system failed!\033[0m"; exit 1; }
 
     echo -e "\033[32m[+] Installing Dependencies...\033[0m"
-    sudo apt-get install -y clang cmake build-essential openssl pkg-config libssl-dev jq
+    sudo apt-get install -y clang cmake build-essential openssl pkg-config libssl-dev jq || { echo -e "\033[31m[-] Dependency installation failed!\033[0m"; exit 1; }
 
     if ! command -v go &> /dev/null; then
         echo -e "\033[32m[+] Installing Go...\033[0m"
         cd $HOME
         ver="1.22.0"
-        wget "https://golang.org/dl/go$ver.linux-amd64.tar.gz"
+        wget -q "https://golang.org/dl/go$ver.linux-amd64.tar.gz" || { echo -e "\033[31m[-] Failed to download Go!\033[0m"; exit 1; }
         sudo rm -rf /usr/local/go
         sudo tar -C /usr/local -xzf "go$ver.linux-amd64.tar.gz"
         rm "go$ver.linux-amd64.tar.gz"
-        echo "export PATH=$PATH:/usr/local/go/bin:$HOME/go/bin" | tee -a ~/.bashrc ~/.profile > /dev/null
+        echo "export PATH=\$PATH:/usr/local/go/bin:\$HOME/go/bin" | tee -a ~/.bashrc ~/.profile > /dev/null
         source ~/.bashrc
         source ~/.profile
     else
@@ -50,12 +50,57 @@ install_node() {
 
     if ! command -v cargo &> /dev/null; then
         echo -e "\033[32m[+] Installing Rust...\033[0m"
-        curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
-        echo "source $HOME/.cargo/env" | tee -a ~/.bashrc ~/.profile > /dev/null
+        curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y || { echo -e "\033[31m[-] Failed to install Rust!\033[0m"; exit 1; }
+        echo "source \$HOME/.cargo/env" | tee -a ~/.bashrc ~/.profile > /dev/null
         source "$HOME/.cargo/env"
     else
         echo -e "\033[33m[!] Rust is already installed, skipping installation.\033[0m"
     fi
+
+    echo -e "\033[32m[+] Cloning 0G Storage Node repository...\033[0m"
+    cd $HOME
+    rm -rf 0g-storage-node
+    git clone https://github.com/0glabs/0g-storage-node.git || { echo -e "\033[31m[-] Failed to clone repository!\033[0m"; exit 1; }
+    cd 0g-storage-node
+    git checkout v0.8.4 || { echo -e "\033[31m[-] Failed to checkout branch!\033[0m"; exit 1; }
+    git submodule update --init || { echo -e "\033[31m[-] Failed to update submodules!\033[0m"; exit 1; }
+
+    echo -e "\033[32m[+] Building 0G Storage Node...\033[0m"
+    cargo build --release || { echo -e "\033[31m[-] Build failed!\033[0m"; exit 1; }
+
+    echo -e "\033[32m[+] Downloading Configuration File...\033[0m"
+    wget -q -O $HOME/0g-storage-node/run/config-testnet-turbo.toml https://josephtran.co/config-testnet-turbo.toml || { echo -e "\033[31m[-] Failed to download configuration file!\033[0m"; exit 1; }
+
+    echo -e "\033[34mEnter your private key (it will be displayed): \033[0m"
+    read PRIVATE_KEY
+    echo -e "\033[33m[!] Your private key: $PRIVATE_KEY\033[0m"
+
+    if [ -z "$PRIVATE_KEY" ]; then
+        echo -e "\033[31m[-] Private key is empty! Exiting...\033[0m"
+        exit 1
+    fi
+
+    sed -i 's|^\s*#\?\s*miner_key\s*=.*|miner_key = "'"$PRIVATE_KEY"'"|' $HOME/0g-storage-node/run/config-testnet-turbo.toml
+    echo -e "\033[32m[+] Private key has been successfully added to the config file.\033[0m"
+
+    sudo tee /etc/systemd/system/zgs.service > /dev/null <<EOF
+        [Unit]
+        Description=ZGS Node
+        After=network.target
+        
+        [Service]
+        User=$USER
+        WorkingDirectory=$HOME/0g-storage-node/run
+        ExecStart=$HOME/0g-storage-node/target/release/zgs_node --config $HOME/0g-storage-node/run/config-testnet-turbo.toml
+        Restart=on-failure
+        RestartSec=10
+        LimitNOFILE=65535
+        
+        [Install]
+        WantedBy=multi-user.target
+        EOF
+
+    echo -e "\033[32m[+] Installation Complete! You can now start your node.\033[0m"
 }
 
 start_node() {
