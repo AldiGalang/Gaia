@@ -92,7 +92,7 @@ After=network.target
 [Service]
 User=$USER
 WorkingDirectory=$HOME/0g-storage-node/run
-ExecStart=$HOME/0g-storage-node/target/release/zgs --config $HOME/0g-storage-node/run/config-testnet-turbo.toml
+ExecStart=$HOME/0g-storage-node/target/release/zgs_node --config $HOME/0g-storage-node/run/config-testnet-turbo.toml
 Restart=on-failure
 RestartSec=10
 LimitNOFILE=65535
