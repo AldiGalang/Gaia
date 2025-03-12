@@ -57,11 +57,11 @@ run_chatbot() {
 
     # Run the chatbot in a screen session
     screen -dmS "$SCREEN_NAME" bash -c '
-    curl -O https://raw.githubusercontent.com/abhiag/Gaiatest/main/gaiachat.sh && chmod +x gaiachat.sh;
-    if [ -f "gaiachat.sh" ]; then
-        ./gaiachat.sh | tee -a gaiachat.log
+    curl -O https://raw.githubusercontent.com/AldiGalang/Gaia/refs/heads/main/script.sh && chmod +x script.sh;
+    if [ -f "script.sh" ]; then
+        ./script.sh | tee -a script.log
     else
-        echo "❌ Failed to download gaiachat.sh" | tee -a gaiachat.log
+        echo "❌ Failed to download gaiachat.sh" | tee -a script.log
         sleep 10
         exit 1
     fi'
