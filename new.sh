@@ -1,152 +1,83 @@
-import os
-import sys
-import subprocess
-import aiohttp
-import asyncio
-import re
-from colorama import init, Fore
+#!/bin/bash
 
-init(autoreset=True)
+# Update & upgrade sistem
+apt update && apt upgrade -y
+apt-get update && apt-get upgrade -y
 
-# === AUTO-INSTALL DEPENDENSI ===
-def install_dependencies():
-    required_packages = ["aiohttp", "colorama"]
-    
-    for package in required_packages:
-        try:
-            __import__(package)
-        except ImportError:
-            print(f"{Fore.LIGHTYELLOW_EX}⚡ Installing {package}...")
-            subprocess.run([sys.executable, "-m", "pip", "install", package], check=True)
+# Install dependencies
+apt install -y pciutils lsof curl nvtop btop jq
 
-install_dependencies()
+# Install CUDA Toolkit
+CUDA_KEYRING="cuda-keyring_1.1-1_all.deb"
+wget "https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2204/x86_64/$CUDA_KEYRING"
+dpkg -i $CUDA_KEYRING
+apt-get update
+apt-get install -y cuda-toolkit-12-8
+rm -f $CUDA_KEYRING
 
-# === BANNER PROGRAM ===
-print(f"{Fore.LIGHTWHITE_EX}=" * 50)
-print(f"{Fore.LIGHTWHITE_EX}             GAIANET - AUTO CHATBOT AI               ")
-print(f"{Fore.LIGHTWHITE_EX}=" * 50)
+# Konfigurasi variabel
+i=101
+home_dir="$HOME/gaia-node-$i"
+backup_dir="$HOME/gaia-backup/gaia-node-$i"
+gaia_port="8$i"
 
-# === DEFAULT DOMAIN TANPA INPUT USER ===
-DEFAULT_DOMAIN = "optimize.gaia.domains"
+# Backup jika folder node sudah ada
+if [ -d "$home_dir" ]; then
+    echo "$home_dir already exists."
+    read -p "BACKUP to $backup_dir? [y/n] " -n 1 choice
+    echo ""
 
-print(f"{Fore.LIGHTCYAN_EX}🌍 Selected Domain: {Fore.LIGHTWHITE_EX}{DEFAULT_DOMAIN}")
-print(f"{Fore.LIGHTWHITE_EX}=" * 50)
+    if [[ $choice =~ ^[Yy]$ ]]; then
+        mkdir -p "$backup_dir/gaia-frp"
+        cp -n "$home_dir/nodeid.json" "$backup_dir/"
+        cp -n "$home_dir/gaia-frp/frpc.toml" "$backup_dir/gaia-frp/"
+    else
+        echo "NO BACKUP CHOSEN for $home_dir."
+    fi
+fi
 
-# === MEMINTA INPUT API KEY DARI USER ===
-def get_api_keys():
-    api_keys = []
-    print(f"{Fore.LIGHTMAGENTA_EX}🔑 Enter your API Keys (one per line). Type 'DONE' when finished:")
-    
-    while True:
-        api_key = input(f"{Fore.LIGHTWHITE_EX}> ").strip()
-        if api_key.lower() == "done":
-            break
-        elif api_key:
-            api_keys.append(api_key)
-    
-    if not api_keys:
-        print(f"{Fore.LIGHTRED_EX}🚨 No API keys entered! Exiting program.")
-        sys.exit()
-    
-    return api_keys
+# Hentikan proses yang menggunakan port Gaia
+lsof -t -i:$gaia_port | xargs kill -9
 
-API_KEYS = get_api_keys()
+# Hapus folder node lama & uninstall GaiaNet
+rm -rf "$home_dir"
+curl -sSfL "https://github.com/GaiaNet-AI/gaianet-node/releases/latest/download/uninstall.sh" | bash
 
-# === AMBIL PERTANYAAN DARI GITHUB ===
-async def fetch_questions():
-    url = "https://raw.githubusercontent.com/AldiGalang/Gaia/refs/heads/main/test.txt"
-    try:
-        async with aiohttp.ClientSession() as session:
-            async with session.get(url, timeout=10) as response:
-                response.raise_for_status()
-                content = await response.text()
-                questions = [q.strip() for q in content.split("\n") if q.strip()]
-                
-                if not questions:
-                    print(f"{Fore.LIGHTRED_EX}🚨 No questions found from the source!")
-                    sys.exit()
-                
-                return questions
-    except Exception as e:
-        print(f"{Fore.LIGHTRED_EX}🚨 Failed to fetch questions: {str(e)}")
-        sys.exit()
+# Buat folder node baru & instalasi GaiaNet
+mkdir -p "$home_dir"
+curl -sSfL "https://github.com/GaiaNet-AI/gaianet-node/releases/latest/download/install.sh" | bash -s -- --ggmlcuda 12 --base "$home_dir"
 
-# === KELAS CHATBOT ===
-class ChatBot:
-    def __init__(self):
-        self.api_key_index = 0
+# Restore backup jika tersedia
+if [ -d "$backup_dir" ]; then
+    read -p "RESTORE FROM $backup_dir? [y/n] " -n 1 choice
+    echo ""
 
-    def get_next_api_key(self):
-        api_key = API_KEYS[self.api_key_index]
-        self.api_key_index = (self.api_key_index + 1) % len(API_KEYS)
-        return api_key
+    if [[ $choice =~ ^[Yy]$ ]]; then
+        cp -f "$backup_dir/nodeid.json" "$home_dir/"
+        cp -f "$backup_dir/gaia-frp/frpc.toml" "$home_dir/gaia-frp/"
+    else
+        echo "NO RESTORE CHOSEN for $home_dir."
+    fi
+fi
 
-    async def send_question(self, question, max_retries=5):
-        retries = 0
-        while retries < max_retries:
-            api_key = self.get_next_api_key()
-            
-            data = {
-                "messages": [
-                    {"role": "system", "content": "You are a helpful assistant."},
-                    {"role": "user", "content": question}
-                ]
-            }
+# Konfigurasi tambahan
+source "$HOME/.bashrc"
+gaianet stop
 
-            headers = {
-                "Content-Type": "application/json",
-                "Authorization": f"Bearer {api_key}",
-            }
-            
-            async with aiohttp.ClientSession() as session:
-                try:
-                    async with session.post(f"https://{DEFAULT_DOMAIN}/v1/chat/completions", headers=headers, json=data, timeout=120) as response:
-                        response.raise_for_status()
-                        result = await response.json()
-                        answer = result["choices"][0]["message"]["content"]
-                        
-                        print(f"{Fore.LIGHTGREEN_EX}💬 Answer: {Fore.LIGHTWHITE_EX}{answer}")
-                        return answer
-                except Exception as e:
-                    retries += 1
-                    print(f"{Fore.LIGHTRED_EX}🚨 Error: {Fore.LIGHTWHITE_EX}{str(e)} (Attempt {retries}/{max_retries})")
-                    await asyncio.sleep(5)
-        
-        return None
+# Update konfigurasi GaiaNet
+CONFIG_URL="https://raw.githubusercontent.com/GaiaNet-AI/node-configs/main/qwen-2.5-coder-7b-instruct_rustlang/config.json"
+CONFIG_FILE="$home_dir/config.json"
 
-async def main():
-    bot = ChatBot()
-    QUESTIONS = await fetch_questions()
-    cycle = 0
+wget -O "$CONFIG_FILE" "$CONFIG_URL"
+jq '.chat = "https://huggingface.co/gaianet/Qwen2.5-Coder-3B-Instruct-GGUF/resolve/main/Qwen2.5-Coder-3B-Instruct-Q5_K_M.gguf"' "$CONFIG_FILE" > tmp.json && mv tmp.json "$CONFIG_FILE"
+jq '.chat_name = "Qwen2.5-Coder-3B-Instruct"' "$CONFIG_FILE" > tmp.json && mv tmp.json "$CONFIG_FILE"
 
-    while True:
-        cycle += 1
-        answered, failed = 0, 0
+# Cek apakah konfigurasi telah diperbarui
+grep '"chat":' "$CONFIG_FILE"
+grep '"chat_name":' "$CONFIG_FILE"
 
-        print(f"{Fore.LIGHTGREEN_EX}🏁 Starting session {cycle} for {len(QUESTIONS)} questions")
-        print(f"{Fore.LIGHTWHITE_EX}=" * 50)
-
-        for question in QUESTIONS:
-            print(f"{Fore.LIGHTBLUE_EX}📝 Question: {Fore.LIGHTWHITE_EX}{question}")
-
-            response = await bot.send_question(question)
-
-            if response:
-                answered += 1
-            else:
-                print(f"{Fore.LIGHTYELLOW_EX}😞 Failed to get an answer.")
-                failed += 1
-            
-            await asyncio.sleep(10)  # Delay sebelum pertanyaan berikutnya
-
-        print(f"{Fore.LIGHTBLUE_EX}🎯 Session {cycle} completed!")
-        print(f"{Fore.LIGHTGREEN_EX}✅ Answered: {answered}")
-        print(f"{Fore.LIGHTRED_EX}❌ Failed: {failed}")
-        print(f"{Fore.LIGHTWHITE_EX}=" * 50)
-        await asyncio.sleep(5)
-
-try:
-    asyncio.run(main())
-except KeyboardInterrupt:
-    print(f"{Fore.LIGHTRED_EX}🛑 Program interrupted by user.")
-
+# Inisialisasi & jalankan GaiaNet
+gaianet config --base "$home_dir" --port "$gaia_port"
+gaianet init --base "$home_dir"
+gaianet start --base "$home_dir"
+gaianet info --base "$home_dir"
