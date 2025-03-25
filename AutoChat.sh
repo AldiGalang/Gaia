@@ -16,7 +16,7 @@ fi
 # Looping untuk melakukan git clone
 for ((i=101; i<101+clone_count; i++)); do
     echo "Cloning gaiabot-$i..."
-    git clone https://github.com/AldiGalang/gaiabot-101.git "gaiabot-$i"
+    git clone https://github.com/AldiGalang/Gaiabot.git "gaiabot-$i"
 done
 
 echo "✅ Semua repo telah berhasil di-clone!"
@@ -43,15 +43,15 @@ if [[ "$line_count" -lt "$folder_count" ]]; then
     exit 1
 fi
 
-echo "📂 Memasukkan API keys dari $input_file ke masing-masing folder gaiabot-*/api_keys.txt..."
+echo "📂 Memasukkan API keys dari $input_file ke masing-masing folder gaiabot-*/file_api_keys.txt..."
 
 # Loop untuk memasukkan setiap baris ke folder yang sesuai
 index=0
 while IFS= read -r line; do
     folder="${folders[$index]}"
     if [[ -d "$folder" ]]; then
-        echo "$line" > "$folder/api_keys.txt"
-        echo "✅ Baris ke-$((index+1)) dimasukkan ke $folder/api_keys.txt"
+        echo "$line" > "$folder/file_api_keys.txt"
+        echo "✅ Baris ke-$((index+1)) dimasukkan ke $folder/file_api_keys.txt"
     fi
     ((index++))
     if [[ $index -ge $folder_count ]]; then
@@ -59,7 +59,7 @@ while IFS= read -r line; do
     fi
 done < "$input_file"
 
-echo "✅ Semua API keys telah dimasukkan ke masing-masing folder gaiabot-*/api_keys.txt!"
+echo "✅ Semua API keys telah dimasukkan ke masing-masing folder gaiabot-*/file_api_keys.txt!"
 
 # Hitung ulang jumlah folder
 folders=(gaiabot-*)
