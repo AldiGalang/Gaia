@@ -72,22 +72,20 @@ fi
 
 echo "📂 Ditemukan ${#folders[@]} folder gaiabot-*. Membuat screen dan menjalankan setup..."
 
-# Loop untuk membuat screen berdasarkan jumlah folder
-for folder in "${folders[@]}"; do
-    screen_name=$(basename "$folder")  # Gunakan nama folder saja, tanpa path
-    echo "🚀 Membuat screen $screen_name dan menjalankan bot.py..."
-
-    screen -dmS "$screen_name" bash -c "
-        cd $folder &&
-        sudo apt update &&
-        sudo apt install -y python3 &&
-        sudo apt install -y python3.12-venv &&
-        python3 -m venv myenv &&
-        source myenv/bin/activate &&
-        pip install -r requirements.txt &&
-        python3 bot.py &&
-        exec bash
+# Menjalankan bot sesuai jumlah yang dimasukkan
+for ((i=101; i<101+clone_count; i++))
+do
+    screen_name="gaiabot-$i"
+    screen -dmS $screen_name bash -c "
+        cd $screen_name && 
+        sudo apt install -y python3 && 
+        sudo apt install -y python3.12-venv && 
+        python3 -m venv myenv && 
+        source myenv/bin/activate && 
+        pip install -r requirements.txt && 
+        python3 bot.py
     "
 done
 
-echo "✅ Semua screen telah dibuat, proses instalasi selesai, dan bot.py sedang berjalan di masing-masing screen!"
+echo "Menjalankan $clone_count bot dari gaiabot-101 hingga gaiabot-$((100+clone_count))"
+
